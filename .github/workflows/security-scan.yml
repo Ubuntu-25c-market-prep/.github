@@ -12,8 +12,11 @@ on:
         type: boolean
         default: true
 
+# A reusable workflow's own permissions block defines the token - it is not inherited
+# from, or merged with, the caller. security-events:write is required by upload-sarif.
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   secrets:
@@ -27,7 +30,7 @@ jobs:
       - name: gitleaks
         run: |
           docker run --rm -v "$PWD:/repo" \
-            zricethezav/gitleaks:latest \
+            zricethezav/gitleaks:v8.30.1 \
             detect --source=/repo --redact --verbose \
             --report-format sarif --report-path /repo/gitleaks.sarif
 
@@ -78,7 +81,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy config scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: .
