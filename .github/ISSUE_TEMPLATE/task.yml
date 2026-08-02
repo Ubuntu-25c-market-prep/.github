@@ -1,0 +1,64 @@
+name: Task
+description: A unit of implementation work belonging to a workstream epic
+title: "[workstream] "
+labels: ["type:task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Title format is `[<workstream>] <imperative summary>`.
+        Link this to its epic in `ops-program` as a sub-issue after creating it.
+
+  - type: dropdown
+    id: workstream
+    attributes:
+      label: Workstream
+      options:
+        - infra
+        - security
+        - scaling
+        - argocd
+        - flux
+        - monitoring
+        - logging
+        - tracing
+        - utils
+        - velero
+        - rancher
+        - finops
+        - istio
+        - zerotrust
+        - bedrock
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to happen
+      description: The change itself, not the background.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dod
+    attributes:
+      label: Definition of done
+      value: |
+        - [ ] Change merged through a reviewed pull request
+        - [ ] Applied and verified in the cluster or account
+        - [ ] Documented in `ops-program` where it affects other workstreams
+    validations:
+      required: true
+
+  - type: input
+    id: epic
+    attributes:
+      label: Parent epic
+      description: "Issue reference, e.g. Ubuntu-25c-market-prep/ops-program#12"
+
+  - type: textarea
+    id: blocked
+    attributes:
+      label: Dependencies
+      description: What must land first, and which workstream owns it.
