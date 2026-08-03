@@ -14,17 +14,22 @@ in [`ops-program/CONVENTIONS.md`](https://github.com/Ubuntu-25c-market-prep/ops-
 
 ## Repositories
 
-| Repo | What lives there |
-|---|---|
-| [`infra-aws`](https://github.com/Ubuntu-25c-market-prep/infra-aws) | Terraform: AWS Org, IAM Identity Center, VPC, EKS, ECR, Bedrock |
-| [`infra-modules`](https://github.com/Ubuntu-25c-market-prep/infra-modules) | Reusable, tag-versioned Terraform modules |
-| [`platform-addons`](https://github.com/Ubuntu-25c-market-prep/platform-addons) | Core addons, Karpenter, KEDA, utils, Velero, Rancher, Istio |
-| [`platform-observability`](https://github.com/Ubuntu-25c-market-prep/platform-observability) | Prometheus, Grafana, EFK, OpenTelemetry, Jaeger, Kubecost |
-| [`platform-security`](https://github.com/Ubuntu-25c-market-prep/platform-security) | Kyverno, Policy Reporter, ZeroTrust |
-| [`gitops-flux`](https://github.com/Ubuntu-25c-market-prep/gitops-flux) | Flux desired state — platform apps |
-| [`gitops-argocd`](https://github.com/Ubuntu-25c-market-prep/gitops-argocd) | Argo CD and Argo Workflows — business apps |
-| [`apps-business`](https://github.com/Ubuntu-25c-market-prep/apps-business) | Business application source |
-| [`ops-program`](https://github.com/Ubuntu-25c-market-prep/ops-program) | Epics, backlog manifest, ADRs, runbooks |
+One repository per **delivery boundary** — something that changes how or when code
+reaches production — rather than one per component. See
+[ADR 0010](https://github.com/Ubuntu-25c-market-prep/ops-program/blob/main/docs/adr/0010-one-repository-per-delivery-boundary.md).
+
+| Repo | What lives there | Delivered by |
+|---|---|---|
+| [`infra-aws`](https://github.com/Ubuntu-25c-market-prep/infra-aws) | Terraform: AWS Org, IAM Identity Center, VPC, EKS, ECR, Bedrock, plus `modules/` | Terraform, CI apply role |
+| [`gitops-flux`](https://github.com/Ubuntu-25c-market-prep/gitops-flux) | Platform add-ons, observability and security, and the Flux objects that deliver them | Flux |
+| [`gitops-argocd`](https://github.com/Ubuntu-25c-market-prep/gitops-argocd) | Business app delivery config — ApplicationSets, promotion path | Argo CD |
+| [`apps-business`](https://github.com/Ubuntu-25c-market-prep/apps-business) | Business application source and its image pipeline | CI, into ECR |
+| [`ops-program`](https://github.com/Ubuntu-25c-market-prep/ops-program) | Epics, backlog manifest, ADRs, runbooks | not delivered |
+| [`.github`](https://github.com/Ubuntu-25c-market-prep/.github) | This profile, the shared security workflow, issue and PR templates | reusable workflow |
+
+`infra-modules`, `platform-addons`, `platform-observability` and `platform-security`
+were archived by ADR 0010 and their contents moved into the repositories above.
+Their issues remain readable.
 
 ## Workstreams
 
