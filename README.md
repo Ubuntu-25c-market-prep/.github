@@ -34,6 +34,23 @@ Three jobs:
 | **Forbidden files** | `.tfvars`, state, kubeconfig, `.pem`, `.env` — things a credential scanner will not flag |
 | **IaC misconfiguration** | Trivy config scan, HIGH and CRITICAL |
 
+### Inputs
+
+| Input | Default | Effect |
+|---|---|---|
+| `iac` | `true` | Run the Trivy misconfiguration scan |
+| `allow_tfvars` | `false` | Permit committed `.tfvars` files |
+
+`allow_tfvars` is the only part of **Forbidden files** a caller can switch off.
+State files and key material are not negotiable — no repository has a good reason
+to commit them.
+
+Turn it on only where the tfvars hold nothing that is not already public in the
+repository: account ids and ARNs a `backend` block has to hardcode anyway, since
+a backend block cannot take variables. A tfvars carrying an email address, a
+hostname, a token or a licence key is not a candidate, and the flag does not make
+it one.
+
 This is defence in depth behind GitHub's native secret scanning and push
 protection, which are enabled on every repository. Native scanning catches
 credential *patterns*; it does not catch a committed state file or a bare account
