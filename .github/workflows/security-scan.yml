@@ -11,6 +11,16 @@ on:
         description: Also run infrastructure-as-code misconfiguration scanning
         type: boolean
         default: true
+      allow_tfvars:
+        description: >-
+          Permit committed .tfvars files. Default false, which is what every
+          repository should want. Opt in ONLY where the tfvars are known to hold
+          nothing but values already public in the repository - account ids and
+          ARNs that a backend block has to hardcode anyway. A tfvars carrying an
+          email address, a hostname, a token or a licence key is not a candidate,
+          and enabling this does not make it one.
+        type: boolean
+        default: false
 
 # A reusable workflow's own permissions block defines the token - it is not inherited
 # from, or merged with, the caller. security-events:write is required by upload-sarif.
@@ -49,11 +59,25 @@ jobs:
 
       # Native secret scanning catches credential patterns. It does not catch a committed
       # tfvars file, a state file, or a kubeconfig - which leak just as much.
+      #
+      # tfvars is the only entry a caller can switch off, via allow_tfvars. State files
+      # and key material are not negotiable: there is no repository for which committing
+      # them is correct.
       - name: Block state, tfvars, kubeconfig and key material
+        env:
+          ALLOW_TFVARS: ${{ inputs.allow_tfvars }}
         run: |
-          bad=$(git ls-files | grep -E \
-            '(\.tfvars$|\.tfvars\.json$|terraform\.tfstate|\.tfstate\.backup$|^\.terraform/|kubeconfig|\.kube/config|\.pem$|\.p12$|\.pfx$|id_rsa|\.env$)' \
-            || true)
+          # (^|/)\.terraform/ not ^\.terraform/ - every Terraform layer keeps its own
+          # nested .terraform/, so the root-anchored form matched nothing in a
+          # multi-layer repository, which is all of them.
+          alts='terraform\.tfstate|\.tfstate\.backup$|(^|/)\.terraform/|kubeconfig|\.kube/config|\.pem$|\.p12$|\.pfx$|id_rsa|\.env$'
+          if [ "${ALLOW_TFVARS}" = "true" ]; then
+            echo "::notice::allow_tfvars is set - .tfvars files are permitted in this repository."
+          else
+            alts='\.tfvars$|\.tfvars\.json$|'"${alts}"
+          fi
+
+          bad=$(git ls-files | grep -E "(${alts})" || true)
           if [ -n "$bad" ]; then
             echo "::error::Files that must never be committed:"
             echo "$bad"
